@@ -176,10 +176,12 @@ VERB_TENSE_CONFIG = {
         'path': ['present', 'active', 'ind'],
     },
     'imperfect': {  # Imperfect (Παρατατικός)
-        'path': ['imperfect', 'active', 'ind'],
+        'path': ['paratatikos', 'active', 'ind'],
+        'alt_path': ['imperfect', 'active', 'ind'],
     },
     'past_continuous': {  # Past Continuous (Παρατατικός)
-        'path': ['imperfect', 'active', 'ind'],
+        'path': ['paratatikos', 'active', 'ind'],
+        'alt_path': ['imperfect', 'active', 'ind'],
     },
     'aorist': {  # Aorist (Αόριστος)
         'path': ['aorist', 'active', 'ind'],
@@ -279,7 +281,8 @@ def check_verb_test(verb_base, form_array, tense):
             correct_forms = word_kind(v_obj, path_prefix + [num, pers])
             if not correct_forms or check_val not in correct_forms:
                 success = False
-                expected = "/".join(correct_forms) if correct_forms else "unknown"
+                available_tenses = list(v_obj.all().keys())
+                expected = "/".join(correct_forms) if correct_forms else f"unknown (path: {path_prefix}, keys: {available_tenses})"
                 if display_prefix: expected = f"{display_prefix}{expected}"
                 errors.append(f'<span style="color: red; font-weight: bold;">Error!</span> [{pronoun}]: entered **"{user_val}"**, must be **{expected}**')
 
