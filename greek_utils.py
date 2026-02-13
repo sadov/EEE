@@ -189,6 +189,7 @@ VERB_TENSE_CONFIG = {
     'future': {  # Simple Future (Στιγμιαίος Μέλλοντας)
         'path': ['conjunctive', 'active', 'ind'],
         'alt_path': ['conjunctive', 'active', 'subj'],
+        'fallback_path': ['present', 'active', 'ind'],
         'prefix': 'θα ',
     },
     'future_continuous': {  # Continuous Future (Συνεχής Μέλλοντας)
@@ -198,6 +199,7 @@ VERB_TENSE_CONFIG = {
     'subjunctive_simple': {  # Simple Subjunctive (Στιγμιαία Υποτακτική)
         'path': ['conjunctive', 'active', 'ind'],
         'alt_path': ['conjunctive', 'active', 'subj'],
+        'fallback_path': ['present', 'active', 'ind'],
         'prefix': 'να ',
     },
     'subjunctive_continuous': {  # Continuous Subjunctive (Συνεχής Υποτακτική)
@@ -252,9 +254,20 @@ def check_verb_test(verb_base, form_array, tense):
     persons = ['pri', 'sec', 'ter']
     numbers = ['sg', 'pl']
     
-    path_prefix = config['path']
-    if 'alt_path' in config and not word_kind(v_obj, path_prefix):
-        path_prefix = config['alt_path']
+    possible_paths = [config.get('path')]
+    if 'alt_path' in config:
+        possible_paths.append(config['alt_path'])
+    if 'fallback_path' in config:
+        possible_paths.append(config['fallback_path'])
+
+    path_prefix = None
+    for p in possible_paths:
+        if p and word_kind(v_obj, p):
+            path_prefix = p
+            break
+    
+    if not path_prefix:
+        path_prefix = config.get('path')
 
     display_prefix = config.get('prefix', '')
     pronouns = ['εγώ', 'εσύ', 'αυτός,-ή,-ό', 'εμείς', 'εσείς', 'αυτοί,-ές,-ά']

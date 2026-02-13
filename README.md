@@ -72,6 +72,7 @@ The project is designed to be modular.
 - **Adding new tenses**: Update the `VERB_TENSE_CONFIG` in `greek_utils.py`. The system currently supports:
     - Present (Ενεστώτας)
     - Imperfect / Past Continuous (Παρατατικός)
+    - Aorist (Αόριστος)
     - Simple Future (Στιγμιαίος Μέλλοντας)
     - Continuous Future (Συνεχής Μέλλοντας)
     - Simple Subjunctive (Στιγμιαία Υποτακτική)
