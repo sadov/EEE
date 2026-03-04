@@ -5,7 +5,7 @@ A collection of interactive **Marimo** notebooks designed to help students pract
 ## Project Structure
 
 - **`greek_nouns.py`**: Interactive notebook for practicing noun declensions (Simple and with Articles).
-- **`greek_verbs.py`**: Interactive notebook for practicing verb inflections (supports Aorist, Imperfect, Future, and Subjunctive).
+- **`greek_verbs.py`**: Interactive notebook for practicing verb inflections (supports Aorist, Imperfect, Future, Subjunctive, and Perfect).
 - **`greek_utils.py`**: Shared utility module containing morphological logic and UI components.
 
 ## Prerequisites
@@ -61,6 +61,7 @@ Check the boxes next to the words you want to practice in the table. The noteboo
 - **Verbs**: Input all 6 persons (Sg/Pl) for the current tense. 
     - **Future forms** (Simple/Continuous) require the **`θα `** prefix (e.g., `θα γράψω`).
     - **Subjunctive forms** (Simple/Continuous) require the **`να `** prefix (e.g., `να γράψω`).
+    - **Perfect forms** require the **`έχω `** prefix (e.g., `έχω γράψει`).
 - **Feedback**: After pressing the **"Check"** button, the system will provide immediate feedback. Errors are highlighted in red with the expected result shown.
 
 ### 4. Progression
@@ -77,4 +78,5 @@ The project is designed to be modular.
     - Continuous Future (Συνεχής Μέλλοντας)
     - Simple Subjunctive (Στιγμιαία Υποτακτική)
     - Continuous Subjunctive (Συνεχής Υποτακτική)
+    - Perfect (Παρακείμενος)
 - **Custom CSS**: Modify `marimo.App` settings or use a custom CSS file to change the visual theme.
