@@ -10,7 +10,7 @@
 
 import marimo
 
-__generated_with = "0.19.7"
+__generated_with = "0.20.4"
 app = marimo.App(
     width="medium",
     css_file="/usr/local/_marimo/custom.css",
@@ -19,15 +19,16 @@ app = marimo.App(
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # Greek Noun Declension
+def _(language_selector, mo, t_ui):
+    _lang = language_selector.value
+    mo.md(f"""
+    # {t_ui("title", _lang)}
 
     [![Open in molab](https://molab.marimo.io/molab-shield.svg)](https://molab.marimo.io/notebooks/nb_KZYjBCXm1jiSjMBnvxWezi)
 
-    **You can test your knowledge of noun declensions on this page.**
+    **{t_ui("description", _lang)}**
 
-    Use the sample word set or upload a TAB-delimited CSV file with "Word" and "Translation" columns.
+    {t_ui("use_csv", _lang)}
     """)
     return
 
@@ -40,18 +41,155 @@ def _(df, mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    file_upload = mo.ui.file(label="Load CSV")
+def _(language_selector, mo, t_ui):
+    _lang = language_selector.value
+    file_upload = mo.ui.file(label=t_ui("file_upload", _lang))
     file_upload
     return (file_upload,)
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    To complete the test, you must correctly fill in all fields in **one of the test forms** for each selected word.
+def _(language_selector, mo, t_ui):
+    _lang = language_selector.value
+    mo.md(f"""
+    {t_ui("instructions", _lang)}
     """)
     return
+
+
+@app.cell(hide_code=True)
+def _(
+    gu,
+    language_selector,
+    mo,
+    noun,
+    noun_form,
+    noun_trans,
+    t_ui,
+    words,
+    words4test,
+):
+    # View Simple Test
+    _lang = language_selector.value
+    _feedback = ""
+    if words4test() and noun:
+        with mo.capture_stdout() as _buffer:
+            gu.check_noun_test(noun, noun_form, mode='simple')
+            _feedback = _buffer.getvalue()
+
+        _view = mo.vstack([
+            mo.md(f"**{t_ui('simple_test', _lang)}** ({len(words4test())}/{len(words)})"),
+            mo.md(f"{t_ui('translation_label', _lang)} **{noun_trans}**"),
+            noun_form,
+            mo.md(_feedback)
+        ])
+    else:
+        _view = mo.md(f"**{t_ui('empty_list', _lang)}**")
+
+    _view
+    return
+
+
+@app.cell(hide_code=True)
+def _(
+    art_noun,
+    art_noun_form,
+    art_noun_trans,
+    gu,
+    language_selector,
+    mo,
+    t_ui,
+    words,
+    words4test,
+):
+    # View Article Test
+    _lang = language_selector.value
+    _feedback = ""
+    if words4test() and art_noun:
+        with mo.capture_stdout() as _buffer:
+            gu.check_noun_test(art_noun, art_noun_form, mode='article')
+            _feedback = _buffer.getvalue()
+
+        _view_art = mo.vstack([
+            mo.md(f"**{t_ui('article_test', _lang)}** ({len(words4test())}/{len(words)})"),
+            mo.md(f"{t_ui('translation_label', _lang)} **{art_noun_trans}**"),
+            art_noun_form,
+            mo.md(_feedback)
+        ])
+    else:
+        _view_art = mo.md(f"**{t_ui('empty_list', _lang)}**")
+
+    _view_art
+    return
+
+
+@app.cell(hide_code=True)
+def _(last_passed_mesg, mo):
+    # Progression message display
+    _res = mo.md(last_passed_mesg())
+    _res
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    UI_STRINGS = {
+        "en": {
+            "title": "Greek Noun Declension",
+            "description": "Practice noun declensions in simple and article modes.",
+            "use_csv": "Use the sample word set or upload a TAB-delimited CSV file with \"Word\" and \"Translation\" columns.",
+            "instructions": "To complete the test, you must correctly fill in all fields in **one of the test forms** (simple or article mode).",
+            "file_upload": "Load CSV",
+            "simple_test": "Simple test for Nouns",
+            "article_test": "Test for Nouns with Articles",
+            "translation_label": "Translation:",
+            "empty_list": "The word list is empty.",
+        },
+        "ru": {
+            "title": "Греческая Склонение Существительных",
+            "description": "Попрактикуйте склонение существительных в простом и артиклевом режимах.",
+            "use_csv": "Используйте образец набора слов или загрузите TAB-разделенный CSV-файл со столбцами \"Word\" и \"Translation\".",
+            "instructions": "Чтобы завершить тест, вы должны правильно заполнить все поля в **одной из форм теста** (простая или артиклевая режим).",
+            "file_upload": "Загрузить CSV",
+            "simple_test": "Простой тест для существительных",
+            "article_test": "Тест для существительных с артиклями",
+            "translation_label": "Перевод:",
+            "empty_list": "Список слов пуст.",
+        },
+        "el": {
+            "title": "Ελληνική Κλίση Ουσιαστικών",
+            "description": "Εξασκήστε την κλίση ουσιαστικών σε απλή και μορφή άρθρου.",
+            "use_csv": "Χρησιμοποιήστε το δείγμα συνόλου λέξεων ή φορτώστε ένα αρχείο CSV που οριοθετείται με TAB με στήλες \"Word\" και \"Translation\".",
+            "instructions": "Για να ολοκληρώσετε το τεστ, πρέπει να συμπληρώσετε σωστά όλα τα πεδία σε **μία από τις φόρμες δοκιμής** (απλή ή μορφή άρθρου).",
+            "file_upload": "Φόρτωση CSV",
+            "simple_test": "Απλό τεστ για ουσιαστικά",
+            "article_test": "Τεστ για ουσιαστικά με άρθρα",
+            "translation_label": "Μετάφραση:",
+            "empty_list": "Η λίστα λέξεων είναι κενή.",
+        },
+    }
+
+    def t_ui(key, lang=None):
+        """Returns translated UI string for given language."""
+        _lang = lang if lang else "en"
+        return UI_STRINGS.get(_lang, UI_STRINGS["en"]).get(key, UI_STRINGS["en"].get(key, key))
+
+    return (t_ui,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    language_selector = mo.ui.dropdown(
+        options={"English": "en", "Русский": "ru", "Ελληνικά": "el"},
+        value="English",
+        label="🌐",
+    )
+    mo.Html(f"""
+    <div style="position: fixed; top: 10px; left: 10px; z-index: 1000; background: white; padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+        {language_selector}
+    </div>
+    """)
+    return (language_selector,)
 
 
 @app.cell(hide_code=True)
@@ -68,58 +206,6 @@ def _(current_noun, gu):
     _acn = current_noun()
     art_noun, art_noun_trans, art_noun_form = gu.create_noun_test_ui([_acn] if _acn else [], mode='article')
     return art_noun, art_noun_form, art_noun_trans
-
-
-@app.cell(hide_code=True)
-def _(gu, mo, noun, noun_form, noun_trans, words, words4test):
-    # View Simple Test
-    _feedback = ""
-    if words4test() and noun:
-        with mo.capture_stdout() as _buffer:
-            gu.check_noun_test(noun, noun_form, mode='simple')
-            _feedback = _buffer.getvalue()
-
-        _view = mo.vstack([
-            mo.md(f"**Simple test for Nouns** ({len(words4test())}/{len(words)})"),
-            mo.md(f"Translation: **{noun_trans}**"),
-            noun_form,
-            mo.md(_feedback)
-        ])
-    else:
-        _view = mo.md('**The word list is empty.**')
-
-    _view
-    return
-
-
-@app.cell(hide_code=True)
-def _(art_noun, art_noun_form, art_noun_trans, gu, mo, words, words4test):
-    # View Article Test
-    _feedback = ""
-    if words4test() and art_noun:
-        with mo.capture_stdout() as _buffer:
-            gu.check_noun_test(art_noun, art_noun_form, mode='article')
-            _feedback = _buffer.getvalue()
-
-        _view_art = mo.vstack([
-            mo.md(f"**Test for Nouns with Articles** ({len(words4test())}/{len(words)})"),
-            mo.md(f"Translation: **{art_noun_trans}**"),
-            art_noun_form,
-            mo.md(_feedback)
-        ])
-    else:
-        _view_art = mo.md('**The word list is empty.**')
-
-    _view_art
-    return
-
-
-@app.cell(hide_code=True)
-def _(last_passed_mesg, mo):
-    # Progression message display
-    _res = mo.md(last_passed_mesg())
-    _res
-    return
 
 
 @app.cell(hide_code=True)
@@ -161,9 +247,9 @@ def _(file_upload, gu):
     # Setup test data
 
     test_data = [
-        {"Translation": "schedule, working hours", "Word": "το ωράριο"},
-        {"Translation": "hour", "Word": "η ώρα"},
-        {"Translation": "space, room", "Word": "ο χώρος"}
+        {"Word": "το ωράριο", "Translation": "schedule, working hours"},
+        {"Word": "η ώρα", "Translation": "hour"},
+        {"Word": "ο χώρος", "Translation": "space, room"},
     ]
     df = gu.load_data(file_upload, test_data)
     return (df,)
@@ -198,6 +284,7 @@ def _():
     import random
     import marimo as mo
     import greek_utils as gu
+
     return gu, mo, random
 
 

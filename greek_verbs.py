@@ -19,15 +19,18 @@ app = marimo.App(
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # Greek Verb Inflection
+def _(language_selector, mo, t_ui):
+    _lang = language_selector.value
+    mo.md(f"""
+    # {t_ui("title", _lang)}
 
     [![Open in molab](https://molab.marimo.io/molab-shield.svg)](https://molab.marimo.io/notebooks/nb_HJPdFCQMSBvpw3EafKK88v)
 
-    **Practice Aorist and Simple Future (Στιγμιαίος Μέλλοντας) forms.**
+    **{t_ui("description", _lang)}**
 
-    Use the sample word set or upload a TAB-delimited CSV file with "Word" and "Translation" columns.
+    {t_ui("select_hint", _lang)}
+
+    {t_ui("use_csv", _lang)}
     """)
     return
 
@@ -40,82 +43,127 @@ def _(df, mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    file_upload = mo.ui.file(label="Load CSV")
+def _(language_selector, mo, t_ui):
+    _lang = language_selector.value
+    file_upload = mo.ui.file(label=t_ui("file_upload", _lang))
     file_upload
     return (file_upload,)
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    To complete the test, you must correctly fill in all fields **in all test forms** for each selected word.
+def _(language_selector, mo, t_ui):
+    _lang = language_selector.value
+    tense_selector = mo.ui.multiselect(
+        options={
+            "Ενεστώτας (Present)": "present",
+            "Παρατατικός (Imperfect)": "imperfect",
+            "Αόριστος (Aorist)": "aorist",
+            "Απλός Μέλλοντας (Simple Future)": "future",
+            "Συνεχής Μέλλοντας (Continuous Future)": "future_continuous",
+            "Απλή Υποτακτική (Simple Subjunctive)": "subjunctive_simple",
+        },
+        value=["Αόριστος (Aorist)", "Απλός Μέλλοντας (Simple Future)"],
+        label=t_ui("select_tenses", _lang),
+        full_width=True,
+    )
+    mo.md(f"""
+    {t_ui("practice_heading", _lang)}
+
+    {tense_selector}
     """)
-    return
+    return (tense_selector,)
 
 
 @app.cell(hide_code=True)
-def _(aorist_form, cv, gu, mo, words, words4test):
-    # Integrated Aorist Test
+def _(cv, gu, language_selector, mo, t_ui, tense_forms, tense_selector, words, words4test):
+    # Dynamic Tense Test Views
+    _lang = language_selector.value
+    _ALL_FORMS = {
+        "present": ("Ενεστώτας", tense_forms["present"]),
+        "imperfect": ("Παρατατικός", tense_forms["imperfect"]),
+        "aorist": ("Αόριστος", tense_forms["aorist"]),
+        "future": ("Απλός Μέλλοντας", tense_forms["future"]),
+        "future_continuous": ("Συνεχής Μέλλοντας", tense_forms["future_continuous"]),
+        "subjunctive_simple": ("Απλή Υποτακτική", tense_forms["subjunctive_simple"]),
+    }
 
-    feedback_aorist = ""
-    if cv:
-        _, _msg = gu.check_verb_test(cv['Word'], aorist_form, 'aorist')
-        feedback_aorist = mo.md(_msg)
+    if not words4test():
+        _view = mo.md(t_ui("empty_list", _lang))
+    else:
+        _header = mo.md(f"{t_ui('translation_label', _lang)} **{cv['Translation']}**") if cv else mo.md("")
+        _views = [_header]
 
-    view_aorist = mo.vstack([
-        mo.md(f"### Aorist (Αόριστος) ({len(words4test())}/{len(words)})"),
-        mo.md(f"Translation: **{cv['Translation']}**") if cv else mo.md(""),
-        aorist_form,
-        feedback_aorist
-    ]) if words4test() else mo.md("")
+        for _tense_key in tense_selector.value:
+            if _tense_key not in _ALL_FORMS:
+                continue
+            _label, _verb_form = _ALL_FORMS[_tense_key]
+            if _verb_form is None:
+                continue
 
-    view_aorist
-    return
+            _feedback = ""
+            if cv:
+                _, _msg = gu.check_verb_test(cv['Word'], _verb_form, _tense_key)
+                _feedback = mo.md(_msg)
 
+            _tense_view = mo.vstack([
+                mo.md(t_ui("test_heading", _lang).format(label=_label, current=len(words4test()), total=len(words))),
+                _verb_form,
+                _feedback,
+            ])
+            _views.append(_tense_view)
 
-@app.cell(hide_code=True)
-def _(cv, future_form, gu, mo, words, words4test):
-    # Integrated Simple Future Test
+        _view = mo.vstack(_views) if len(_views) > 1 else mo.md(t_ui("select_at_least_one", _lang))
 
-    feedback_future = ""
-    if cv:
-        _, _msg = gu.check_verb_test(cv['Word'], future_form, 'future')
-        feedback_future = mo.md(_msg)
-
-    view_future = mo.vstack([
-        mo.md(f"### Simple Future (Στιγμιαίος Μέλλοντας) ({len(words4test())}/{len(words)})"),
-        mo.md(f"Translation: **{cv['Translation']}**") if cv else mo.md(""),
-        future_form,
-        feedback_future
-    ]) if words4test() else mo.md("")
-
-    view_future
+    _view
     return
 
 
 @app.cell(hide_code=True)
 def _(
-    aorist_form,
     cv,
-    future_form,
     gu,
     last_passed_mesg,
     mo,
+    set_cv,
     set_last_passed_mesg,
     set_words4test,
+    tense_forms,
+    tense_selector,
     words,
     words4test,
 ):
-    # Final forms check and progression
+    # Check and Progression: all selected tenses must pass before moving on
+    _ALL_FORMS = {
+        "present": tense_forms["present"],
+        "imperfect": tense_forms["imperfect"],
+        "aorist": tense_forms["aorist"],
+        "future": tense_forms["future"],
+        "future_continuous": tense_forms["future_continuous"],
+        "subjunctive_simple": tense_forms["subjunctive_simple"],
+    }
+    _current_verb = cv()
 
-    if cv:
-        a_ok, _ = gu.check_verb_test(cv['Word'], aorist_form, 'aorist')
-        f_ok, _ = gu.check_verb_test(cv['Word'], future_form, 'future')
+    if _current_verb:
+        _all_passed = True
+        for _tense_key in tense_selector.value:
+            _f = _ALL_FORMS.get(_tense_key)
+            if _f is not None:
+                _ok, _ = gu.check_verb_test(_current_verb['Word'], _f, _tense_key)
+                if not _ok:
+                    _all_passed = False
+                    break
 
-        def set_cv(val): pass 
-
-        gu.process_verb_completion(cv, a_ok, f_ok, words, words4test(), set_words4test, set_last_passed_mesg, set_cv)
+        if _all_passed:
+            import random as _random
+            new_words4test = [w for w in words4test() if w["Word"] != _current_verb["Word"]]
+            set_words4test(new_words4test)
+            if new_words4test:
+                set_cv(_random.choice(new_words4test))
+            else:
+                set_cv(None)
+            remaining, total = len(new_words4test), len(words)
+            passed_mesg = f'<span style="color: green;">Test for <b>"{_current_verb["Word"]} -- {_current_verb["Translation"]}"</b> passed.\n\n{remaining} words remaining out of {total}.</span>'
+            set_last_passed_mesg(passed_mesg)
 
     res = mo.md(last_passed_mesg())
     res
@@ -145,8 +193,11 @@ def _(gu, mo, table):
     words = gu.get_words(table)
     words4test, set_words4test = mo.state(words.copy() if words else [])
     last_passed_mesg, set_last_passed_mesg = mo.state("")
+    cv, set_cv = mo.state(None)
     return (
+        cv,
         last_passed_mesg,
+        set_cv,
         set_last_passed_mesg,
         set_words4test,
         words,
@@ -155,13 +206,92 @@ def _(gu, mo, table):
 
 
 @app.cell(hide_code=True)
-def _(gu, words, words4test):
-    # Setup test forms
+def _(cv, gu, set_cv, words, words4test):
+    # Setup test forms for all tenses
+    _current_verb = cv()
+    if not _current_verb and words4test():
+        import random as _random
+        _current_verb = _random.choice(words4test())
+        set_cv(_current_verb)
 
-    cv = words4test()[0] if words4test() else None # Simple selection from state
-    aorist_form, aorist_md = gu.create_verb_test_ui("Aorist (Αόριστος)", words, words4test(), cv)
-    future_form, future_md = gu.create_verb_test_ui("Simple Future (Στιγμιαίος Μέλλοντας)", words, words4test(), cv)
-    return aorist_form, cv, future_form
+    tense_forms = {
+        "present": gu.create_verb_test_ui("Present (Ενεστώτας)", words, words4test(), _current_verb)[0],
+        "imperfect": gu.create_verb_test_ui("Imperfect (Παρατατικός)", words, words4test(), _current_verb)[0],
+        "aorist": gu.create_verb_test_ui("Aorist (Αόριστος)", words, words4test(), _current_verb)[0],
+        "future": gu.create_verb_test_ui("Simple Future (Απλός Μέλλοντας)", words, words4test(), _current_verb)[0],
+        "future_continuous": gu.create_verb_test_ui("Continuous Future (Συνεχής Μέλλοντας)", words, words4test(), _current_verb)[0],
+        "subjunctive_simple": gu.create_verb_test_ui("Simple Subjunctive (Απλή Υποτακτική)", words, words4test(), _current_verb)[0],
+    }
+    return (tense_forms,)
+
+
+# === Configuration and helpers (hidden) ===
+
+@app.cell(hide_code=True)
+def _():
+    UI_STRINGS = {
+        "en": {
+            "title": "Greek Verb Inflection",
+            "description": "Practice verb conjugation across multiple tenses.",
+            "select_hint": "Select a tense or combination of tenses to practice: Present, Imperfect, Aorist, Simple Future, Continuous Future, or Simple Subjunctive.",
+            "use_csv": "Use the sample word set or upload a TAB-delimited CSV file with \"Word\" and \"Translation\" columns.",
+            "file_upload": "Load CSV",
+            "select_tenses": "Select tenses:",
+            "practice_heading": "## Practice: Verb Conjugation",
+            "empty_list": "Word list is empty. Select words in the table above.",
+            "translation_label": "Translation:",
+            "test_heading": "### Test: {label} ({current}/{total})",
+            "select_at_least_one": "Select at least one tense above.",
+        },
+        "ru": {
+            "title": "Греческое Спряжение Глаголов",
+            "description": "Попрактикуйте спряжение глаголов в различных временах.",
+            "select_hint": "Выберите один или несколько времен для практики: Present, Imperfect, Aorist, Simple Future, Continuous Future или Simple Subjunctive.",
+            "use_csv": "Используйте образец набора слов или загрузите TAB-разделенный CSV-файл со столбцами \"Word\" и \"Translation\".",
+            "file_upload": "Загрузить CSV",
+            "select_tenses": "Выберите времена:",
+            "practice_heading": "## Практика: Спряжение глаголов",
+            "empty_list": "Список слов пуст. Выберите слова в таблице выше.",
+            "translation_label": "Перевод:",
+            "test_heading": "### Тест: {label} ({current}/{total})",
+            "select_at_least_one": "Выберите хотя бы одно время выше.",
+        },
+        "el": {
+            "title": "Ελληνική Σύζευξη Ρημάτων",
+            "description": "Εξασκηθείτε σε ρηματική σύζευξη σε διάφορους χρόνους.",
+            "select_hint": "Επιλέξτε έναν ή περισσότερους χρόνους για εξάσκηση: Present, Imperfect, Aorist, Simple Future, Continuous Future ή Simple Subjunctive.",
+            "use_csv": "Χρησιμοποιήστε το δείγμα συνόλου λέξεων ή φορτώστε ένα αρχείο CSV που οριοθετείται με TAB με στήλες \"Word\" και \"Translation\".",
+            "file_upload": "Φόρτωση CSV",
+            "select_tenses": "Επιλέξτε χρόνους:",
+            "practice_heading": "## Εξάσκηση: Σύζευξη Ρημάτων",
+            "empty_list": "Η λίστα λέξεων είναι κενή. Επιλέξτε λέξεις στον παραπάνω πίνακα.",
+            "translation_label": "Μετάφραση:",
+            "test_heading": "### Τεστ: {label} ({current}/{total})",
+            "select_at_least_one": "Επιλέξτε τουλάχιστον έναν χρόνο παραπάνω.",
+        },
+    }
+
+    def t_ui(key, lang=None):
+        """Returns translated UI string for given language."""
+        _lang = lang if lang else "en"
+        return UI_STRINGS.get(_lang, UI_STRINGS["en"]).get(key, UI_STRINGS["en"].get(key, key))
+
+    return (t_ui,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    language_selector = mo.ui.dropdown(
+        options={"English": "en", "Русский": "ru", "Ελληνικά": "el"},
+        value="English",
+        label="🌐",
+    )
+    mo.Html(f"""
+    <div style="position: fixed; top: 10px; left: 10px; z-index: 1000; background: white; padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+        {language_selector}
+    </div>
+    """)
+    return (language_selector,)
 
 
 @app.cell(hide_code=True)
