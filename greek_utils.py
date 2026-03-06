@@ -85,7 +85,7 @@ def _noun_declension_test(user_input, declension, noun_base, noun_descr, article
 
     # Validate noun form
     correct_noun_forms = word_kind(get_word_by_type(noun_base, 'Noun'), noun_path)
-    word_is_correct = noun_word in correct_noun_forms if correct_noun_forms else False
+    word_is_correct = noun_word.lower() in [f.lower() for f in correct_noun_forms] if correct_noun_forms else False
 
     if article_descr is None:
         if word_is_correct:
@@ -98,7 +98,7 @@ def _noun_declension_test(user_input, declension, noun_base, noun_descr, article
     art_path = [declension[0], noun_type, declension[1]]
     article_forms = word_kind(article_descr, art_path)
 
-    if article_forms and noun_article in article_forms and word_is_correct:
+    if article_forms and noun_article.lower() in [f.lower() for f in article_forms] and word_is_correct:
         return True
     else:
         article_type = 'def' if article_descr.article in ['ο', 'η', 'το'] else 'indef'
@@ -288,7 +288,7 @@ def check_verb_test(verb_base, form_array, tense):
 
             check_val = user_val
             if display_prefix:
-                if user_val.startswith(display_prefix):
+                if user_val.lower().startswith(display_prefix.lower()):
                     check_val = user_val[len(display_prefix):].strip()
                 else:
                     errors.append(f'<span style="color: red; font-weight: bold;">Error!</span> [{pronoun}]: Write with **"{display_prefix.strip()}"**')
@@ -296,7 +296,7 @@ def check_verb_test(verb_base, form_array, tense):
                     continue
 
             correct_forms = word_kind(v_obj, path_prefix + [num, pers])
-            if not correct_forms or check_val not in correct_forms:
+            if not correct_forms or check_val.lower() not in [f.lower() for f in correct_forms]:
                 success = False
                 available_tenses = list(v_obj.all().keys())
                 expected = "/".join(correct_forms) if correct_forms else f"unknown (path: {path_prefix}, keys: {available_tenses})"
