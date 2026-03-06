@@ -135,7 +135,7 @@ def _(last_passed_mesg, mo):
 def _():
     UI_STRINGS = {
         "en": {
-            "title": "Greek Noun Declension",
+            "title": "Modern Greek — Noun Declension",
             "description": "Practice noun declensions in simple and article modes.",
             "use_csv": "Use the sample word set or upload a TAB-delimited CSV file with \"Word\" and \"Translation\" columns.",
             "instructions": "To complete the test, you must correctly fill in all fields in **one of the test forms** (simple or article mode).",
@@ -146,7 +146,7 @@ def _():
             "empty_list": "The word list is empty.",
         },
         "ru": {
-            "title": "Греческая Склонение Существительных",
+            "title": "Новогреческий — Склонение существительных",
             "description": "Попрактикуйте склонение существительных в простом и артиклевом режимах.",
             "use_csv": "Используйте образец набора слов или загрузите TAB-разделенный CSV-файл со столбцами \"Word\" и \"Translation\".",
             "instructions": "Чтобы завершить тест, вы должны правильно заполнить все поля в **одной из форм теста** (простая или артиклевая режим).",
@@ -157,7 +157,7 @@ def _():
             "empty_list": "Список слов пуст.",
         },
         "el": {
-            "title": "Ελληνική Κλίση Ουσιαστικών",
+            "title": "Νέα Ελληνικά — Κλίση Ουσιαστικών",
             "description": "Εξασκήστε την κλίση ουσιαστικών σε απλή και μορφή άρθρου.",
             "use_csv": "Χρησιμοποιήστε το δείγμα συνόλου λέξεων ή φορτώστε ένα αρχείο CSV που οριοθετείται με TAB με στήλες \"Word\" και \"Translation\".",
             "instructions": "Για να ολοκληρώσετε το τεστ, πρέπει να συμπληρώσετε σωστά όλα τα πεδία σε **μία από τις φόρμες δοκιμής** (απλή ή μορφή άρθρου).",
@@ -185,7 +185,7 @@ def _(mo):
         label="🌐",
     )
     mo.Html(f"""
-    <div style="position: fixed; top: 10px; left: 10px; z-index: 1000; background: white; padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+    <div style="position: fixed; top: 60px; right: 10px; z-index: 1000; background: white; padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
         {language_selector}
     </div>
     """)

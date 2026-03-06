@@ -231,7 +231,7 @@ def _(cv, gu, set_cv, words, words4test):
 def _():
     UI_STRINGS = {
         "en": {
-            "title": "Greek Verb Inflection",
+            "title": "Modern Greek — Verb Conjugation",
             "description": "Practice verb conjugation across multiple tenses.",
             "select_hint": "Select a tense or combination of tenses to practice: Present, Imperfect, Aorist, Simple Future, Continuous Future, or Simple Subjunctive.",
             "use_csv": "Use the sample word set or upload a TAB-delimited CSV file with \"Word\" and \"Translation\" columns.",
@@ -244,7 +244,7 @@ def _():
             "select_at_least_one": "Select at least one tense above.",
         },
         "ru": {
-            "title": "Греческое Спряжение Глаголов",
+            "title": "Новогреческий — Спряжение глаголов",
             "description": "Попрактикуйте спряжение глаголов в различных временах.",
             "select_hint": "Выберите один или несколько времен для практики: Present, Imperfect, Aorist, Simple Future, Continuous Future или Simple Subjunctive.",
             "use_csv": "Используйте образец набора слов или загрузите TAB-разделенный CSV-файл со столбцами \"Word\" и \"Translation\".",
@@ -257,7 +257,7 @@ def _():
             "select_at_least_one": "Выберите хотя бы одно время выше.",
         },
         "el": {
-            "title": "Ελληνική Σύζευξη Ρημάτων",
+            "title": "Νέα Ελληνικά — Σύζευξη Ρημάτων",
             "description": "Εξασκηθείτε σε ρηματική σύζευξη σε διάφορους χρόνους.",
             "select_hint": "Επιλέξτε έναν ή περισσότερους χρόνους για εξάσκηση: Present, Imperfect, Aorist, Simple Future, Continuous Future ή Simple Subjunctive.",
             "use_csv": "Χρησιμοποιήστε το δείγμα συνόλου λέξεων ή φορτώστε ένα αρχείο CSV που οριοθετείται με TAB με στήλες \"Word\" και \"Translation\".",
@@ -287,7 +287,7 @@ def _(mo):
         label="🌐",
     )
     mo.Html(f"""
-    <div style="position: fixed; top: 10px; left: 10px; z-index: 1000; background: white; padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+    <div style="position: fixed; top: 60px; right: 10px; z-index: 1000; background: white; padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
         {language_selector}
     </div>
     """)
