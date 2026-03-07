@@ -3,6 +3,7 @@
 # dependencies = [
 #     "marimo>=0.19.4",
 #     "mcp==1.25.0",
+#     "modern-greek-eee @ git+https://github.com/sadov/EEE.git",
 #     "modern-greek-inflexion==2.0.7",
 #     "pandas==2.3.3",
 # ]
@@ -14,6 +15,7 @@ __generated_with = "0.20.4"
 app = marimo.App(
     width="medium",
     css_file="/usr/local/_marimo/custom.css",
+    html_head_file="head.html",
     auto_download=["html"],
 )
 
@@ -283,7 +285,11 @@ def _(gu, mo, random, table):
 def _():
     import random
     import marimo as mo
-    import greek_utils as gu
+
+    try:
+        from modern_greek_eee import greek_utils as gu
+    except ImportError:
+        import greek_utils as gu
 
     return gu, mo, random
 

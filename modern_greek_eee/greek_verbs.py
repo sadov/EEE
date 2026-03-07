@@ -3,6 +3,7 @@
 # dependencies = [
 #     "marimo>=0.19.4",
 #     "mcp==1.25.0",
+#     "modern-greek-eee @ git+https://github.com/sadov/EEE.git",
 #     "modern-greek-inflexion==2.0.7",
 #     "pandas==2.3.3",
 # ]
@@ -14,6 +15,7 @@ __generated_with = "0.19.7"
 app = marimo.App(
     width="medium",
     css_file="/usr/local/_marimo/custom.css",
+    html_head_file="head.html",
     auto_download=["html"],
 )
 
@@ -90,7 +92,8 @@ def _(cv, gu, language_selector, mo, t_ui, tense_forms, tense_selector, words, w
     if not words4test():
         _view = mo.md(t_ui("empty_list", _lang))
     else:
-        _header = mo.md(f"{t_ui('translation_label', _lang)} **{cv['Translation']}**") if cv else mo.md("")
+        _cv = cv()
+        _header = mo.md(f"{t_ui('translation_label', _lang)} **{_cv['Translation']}**") if _cv else mo.md("")
         _views = [_header]
 
         for _tense_key in tense_selector.value:
@@ -101,8 +104,8 @@ def _(cv, gu, language_selector, mo, t_ui, tense_forms, tense_selector, words, w
                 continue
 
             _feedback = ""
-            if cv:
-                _, _msg = gu.check_verb_test(cv['Word'], _verb_form, _tense_key)
+            if _cv:
+                _, _msg = gu.check_verb_test(_cv['Word'], _verb_form, _tense_key)
                 _feedback = mo.md(_msg)
 
             _tense_view = mo.vstack([
@@ -299,7 +302,12 @@ def _():
     # Package imports
 
     import marimo as mo
-    import greek_utils as gu
+
+    try:
+        from modern_greek_eee import greek_utils as gu
+    except ImportError:
+        import greek_utils as gu
+
     return gu, mo
 
 
